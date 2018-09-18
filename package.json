@@ -1,0 +1,21 @@
+{
+  "name": "frontend-downloader",
+  "version": "1.0.0",
+  "description": "Automated Puppeteer script for downloading videos from Frontend Masters",
+  "main": "index.js",
+  "repository": "https://github.com/coogie/frontend-downloader.git",
+  "author": "Stephen Coogan <hello@coog.ie>",
+  "license": "MIT",
+  "scripts": {
+    "start": "node --experimental-modules index.mjs"
+  },
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "dotenv": "^6.0.0",
+    "mkdirp": "^0.5.1",
+    "puppeteer": "^1.8.0"
+  },
+  "engines": {
+    "node": ">=10.7.0"
+  }
+}
