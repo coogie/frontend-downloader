@@ -11,8 +11,8 @@ Create a `.env` file in the root and populate it with the following variables:
 
 | Variable                | Value                   |
 | ----------------------- | ----------------------- |
-| FRONTEND_MASTERS_USER   | `youremail@domain.com`  |
-| FRONTEND_MASTERS_PASS   | `hunter2`               |
+| FRONTEND_MASTERS_USER   | E.g.: `youremail@domain.com`  |
+| FRONTEND_MASTERS_PASS   | E.g.: `hunter2`               |
 | FRONTEND_MASTERS_COURSE | The URL slug for the course. E.g. for `https://frontendmasters.com/courses/progressive-web-apps/` the value of this would be `progressive-web-apps` |
 
 ## Running
