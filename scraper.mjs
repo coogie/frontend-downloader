@@ -1,35 +1,74 @@
 import puppeteer from 'puppeteer';
+import sanitizeFilename from 'sanitize-filename';
+
+import { red, green, blue } from './';
 
 const URL = paths => `https://frontendmasters.com/${paths.join('/')}`;
 
-export const scraper = async ({ username, password, targetCourse, directory }) => {
-  const browser = await puppeteer.launch({
-    headless: false,
-    slowMo: 30,
-  });
-  const page = await browser.newPage();
-  await page.goto(URL(['login']));
-  await page.waitForSelector('#loginForm');
+const scraper = async ({ username, password, targetCourse }) => {
+  try {
+    // This will list our videos, with their titles and video src URL.
+    // This array will be returned at the end of our function.
+    const CURRICULUM = [];
 
-  const emailInput = await page.$('#username')
-  const passwordInput = await page.$('#password')
-  const loginButton = await page.$('.Button.ButtonRed.ButtonLarge.g-recaptcha');
+    // Launch Chrome
+    const browser = await puppeteer.launch({ headless: false });
+    const page = await browser.newPage();
 
-  await emailInput.click();
-  await emailInput.type(username);
-  await passwordInput.click();
-  await passwordInput.type(password);
-  await loginButton.click();
-  await page.waitForNavigation();
+    // Log in to FEM
+    await page.goto(URL(['login']));
+    await page.waitForSelector('#loginForm');
+    blue('Attempting login');
+    blue(`Entering username: ${username}`);
+    await page.type('#username', username);
+    blue(`Entering password: ${password.replace(/./gi, '*')}`);
+    await page.type('#password', password);
+    await page.click('.Button.ButtonRed.ButtonLarge.g-recaptcha');
+    await page.waitForNavigation();
+    green('Successfully logged in');
 
-  await page.goto(URL(['courses', targetCourse]));
-  
-  await page.waitForSelector('.Button.ButtonRed');
-  const watchButton = await page.$('.Button.ButtonRed');
-  await watchButton.click();
-  await page.waitForNavigation();
+    // Go to the course specified in the ENV var
+    blue(`Navigating to course: ${targetCourse}`);
+    await page.goto(URL(['courses', targetCourse]));
+    green('Successfully navigated to course');
 
-  await page.waitForSelector('.FMPlayerScrolling > li');
-  const lessonLinks = await page.$$('.FMPlayerScrolling > li > a');
-  // const lessonLinkss = Promise.all(lessonLinks.map(link => page.evaluate()));
-}
+    // Navigate to the Player Page for that course
+    blue('Navigating to course player page');
+    const firstLessonSelector = '.CourseToc .LessonList:first-of-type > li:first-child > a';
+    await page.waitForSelector(firstLessonSelector);
+    await page.click(firstLessonSelector);
+    await page.waitForNavigation();
+    green('Successfully navigated to course player page');
+
+    // Gather up all the links for each video
+    await page.waitForSelector('.FMPlayerScrolling > li');
+    const video = await page.$('video');
+    const lessonLinks = await page.$$('.FMPlayerScrolling > li:not(.lesson-group) > a');
+
+    blue('Aggregating player links and building curriculum');
+    // Click through each link so it loads the video
+    let index = 0;
+    for (const link of lessonLinks) {
+      const item = {
+        index: String(index).padStart(2, '0'),
+        // title: sanitizeFilename(await link.$eval('.title', title => title.innerText)),
+        title: sanitizeFilename(await link.getProperty('innerText')),
+      };
+      await link.click();
+      item.src = await video.getProperty('src');
+      blue(`Adding "${item.title}" to curriculum`);
+      CURRICULUM.push(item);
+      // WOAH THE PONY!
+      // Try make it look less suspect...
+      console.log(CURRICULUM);
+      const betweenEightAndTwelveSeconds = (Math.floor(Math.random() * 12) + 8) * 1000;
+      await page.waitFor(betweenEightAndTwelveSeconds);
+    }
+
+    console.log(CURRICULUM);
+  } catch (error) {
+    red(`\n ${error} \n`);
+  }
+};
+
+export default scraper;

@@ -2,10 +2,12 @@ import 'dotenv/config';
 import chalk from 'chalk';
 import mkdirp from 'mkdirp';
 import path from 'path';
-import { scraper } from './scraper';
 
-const log = message => console.log(chalk.blue(message));
-const err = message => console.log(chalk.red(message));
+import scraper from './scraper';
+
+export const red = message => console.log(chalk.red(message));
+export const green = message => console.log(chalk.green(message));
+export const blue = message => console.log(chalk.blue(message));
 
 (async () => {
   const {
@@ -16,15 +18,13 @@ const err = message => console.log(chalk.red(message));
   } = process.env;
 
   if (!FRONTEND_MASTERS_USER || !FRONTEND_MASTERS_PASS || !FRONTEND_MASTERS_COURSE) {
-    err('ERROR');
-    err('Environment variables not set!');
-    log('');
-    log('Please make sure to set the following in a .env file:');
-    log('  FRONTEND_MASTERS_USER');
-    log('  FRONTEND_MASTERS_PASS');
-    log('  FRONTEND_MASTERS_COURSE');
-    log('  FRONTEND_MASTERS_DIR  (optional)');
-    log('');
+    red('ERROR');
+    red('Environment variables not set! \n');
+    blue('Please make sure to set the following in a .env file:');
+    blue('  FRONTEND_MASTERS_USER');
+    blue('  FRONTEND_MASTERS_PASS');
+    blue('  FRONTEND_MASTERS_COURSE');
+    blue('  FRONTEND_MASTERS_DIR  (optional) \n');
 
     throw Error('Environment variables not set');
   }
@@ -39,5 +39,7 @@ const err = message => console.log(chalk.red(message));
   const saveDir = path.join(process.cwd(), config.directory);
   mkdirp.sync(saveDir);
 
-  await scraper(config);
+  const videos = await scraper(config);
+
+  console.log(videos);
 })();

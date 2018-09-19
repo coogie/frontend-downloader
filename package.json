@@ -13,7 +13,8 @@
     "chalk": "^2.4.1",
     "dotenv": "^6.0.0",
     "mkdirp": "^0.5.1",
-    "puppeteer": "^1.8.0"
+    "puppeteer": "^1.8.0",
+    "sanitize-filename": "^1.6.1"
   },
   "engines": {
     "node": ">=10.7.0"
