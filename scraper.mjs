@@ -23,8 +23,10 @@ const scraper = async ({ username, password, targetCourse }) => {
     await page.type('#username', username);
     blue(`Entering password: ${password.replace(/./gi, '*')}`);
     await page.type('#password', password);
-    await page.click('.Button.ButtonRed.ButtonLarge.g-recaptcha');
-    await page.waitForNavigation();
+    await Promise.all([
+      page.click('.Button.ButtonRed.ButtonLarge.g-recaptcha'),
+      page.waitForNavigation()
+    ]);
     green('Successfully logged in');
 
     // Go to the course specified in the ENV var
@@ -36,8 +38,10 @@ const scraper = async ({ username, password, targetCourse }) => {
     blue('Navigating to course player page');
     const firstLessonSelector = '.CourseToc .LessonList:first-of-type > li:first-child > a';
     await page.waitForSelector(firstLessonSelector);
-    await page.click(firstLessonSelector);
-    await page.waitForNavigation();
+    await Promise.all([
+      page.click(firstLessonSelector),
+      page.waitForNavigation()
+    ]);
     green('Successfully navigated to course player page');
 
     // Gather up all the links for each video
@@ -49,23 +53,24 @@ const scraper = async ({ username, password, targetCourse }) => {
     // Click through each link so it loads the video
     let index = 0;
     for (const link of lessonLinks) {
-      const item = {
-        index: String(index).padStart(2, '0'),
-        // title: sanitizeFilename(await link.$eval('.title', title => title.innerText)),
-        title: sanitizeFilename(await link.getProperty('innerText')),
-      };
       await link.click();
-      item.src = await video.getProperty('src');
-      blue(`Adding "${item.title}" to curriculum`);
-      CURRICULUM.push(item);
       // WOAH THE PONY!
       // Try make it look less suspect...
-      console.log(CURRICULUM);
       const betweenEightAndTwelveSeconds = (Math.floor(Math.random() * 12) + 8) * 1000;
       await page.waitFor(betweenEightAndTwelveSeconds);
+
+      const paddedIndex = String(index).padStart(2, '0');
+      const sanitizedTitle = sanitizeFilename(await link.$eval('.title', title => title.innerText)).replace(/\s/gi, '_');
+      const item = {
+        title: `[${paddedIndex}] - ${sanitizedTitle}`,
+      };
+      item.src = await page.evaluate(video => video.src, video);
+      blue(`Adding "${item.title}" to curriculum`);
+      CURRICULUM.push(item);
+      index = index + 1;
     }
 
-    console.log(CURRICULUM);
+    return CURRICULUM;
   } catch (error) {
     red(`\n ${error} \n`);
   }
