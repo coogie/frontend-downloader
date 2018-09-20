@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer';
 import sanitizeFilename from 'sanitize-filename';
 
-import { red, green, blue } from './';
+import { red, green, blue, waitBetweenSeconds } from './utils';
 
 const URL = paths => `https://frontendmasters.com/${paths.join('/')}`;
 
@@ -12,7 +12,7 @@ const scraper = async ({ username, password, targetCourse }) => {
     const CURRICULUM = [];
 
     // Launch Chrome
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
     // Log in to FEM
@@ -50,14 +50,19 @@ const scraper = async ({ username, password, targetCourse }) => {
     const lessonLinks = await page.$$('.FMPlayerScrolling > li:not(.lesson-group) > a');
 
     blue('Aggregating player links and building curriculum');
+    blue('------------------------------------------------')
+    blue('|  THIS MAY TAKE SOME TIME! FEEL FREE TO MAKE  |')
+    blue('|  YOURSELF A CUP OF TEA AND CONTEMPLATE LIFE  |')
+    blue('------------------------------------------------')
     // Click through each link so it loads the video
     let index = 0;
     for (const link of lessonLinks) {
       await link.click();
       // WOAH THE PONY!
       // Try make it look less suspect...
-      const betweenEightAndTwelveSeconds = (Math.floor(Math.random() * 12) + 8) * 1000;
-      await page.waitFor(betweenEightAndTwelveSeconds);
+      const delay = waitBetweenSeconds(8, 12);
+      blue(`Waiting ${delay} seconds`);
+      await page.waitFor(delay);
 
       const paddedIndex = String(index).padStart(2, '0');
       const sanitizedTitle = sanitizeFilename(await link.$eval('.title', title => title.innerText)).replace(/\s/gi, '_');
@@ -70,9 +75,12 @@ const scraper = async ({ username, password, targetCourse }) => {
       index = index + 1;
     }
 
+    browser.close();
     return CURRICULUM;
   } catch (error) {
     red(`\n ${error} \n`);
+    throw Error(error);
+    process.exit(1);
   }
 };
 
