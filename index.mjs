@@ -1,13 +1,10 @@
 import 'dotenv/config';
-import chalk from 'chalk';
 import mkdirp from 'mkdirp';
 import path from 'path';
 
 import scraper from './scraper';
-
-export const red = message => console.log(chalk.red(message));
-export const green = message => console.log(chalk.green(message));
-export const blue = message => console.log(chalk.blue(message));
+import download from './download';
+import { red, blue } from './utils';
 
 (async () => {
   const {
@@ -33,13 +30,16 @@ export const blue = message => console.log(chalk.blue(message));
     username: FRONTEND_MASTERS_USER.toString(),
     password: FRONTEND_MASTERS_PASS.toString(),
     targetCourse: FRONTEND_MASTERS_COURSE,
-    directory: FRONTEND_MASTERS_DIR || 'downloads',
+    directory: FRONTEND_MASTERS_DIR || `${path.join(process.cwd(), 'downloads')}`,
   };
 
-  const saveDir = path.join(process.cwd(), config.directory);
-  mkdirp.sync(saveDir);
+  const downloadDirectory = path.join(config.directory, config.targetCourse);
+  mkdirp.sync(downloadDirectory);
 
-  const videos = await scraper(config);
-
-  console.log(videos);
+  const curriculum = await scraper(config);
+ 
+  download({
+    curriculum,
+    directory: downloadDirectory,
+  });
 })();
