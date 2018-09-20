@@ -60,8 +60,8 @@ const scraper = async ({ username, password, targetCourse }) => {
       await link.click();
       // WOAH THE PONY!
       // Try make it look less suspect...
-      const delay = waitBetweenSeconds(8, 12);
-      blue(`Waiting ${delay} seconds`);
+      const delay = waitBetweenSeconds(12, 19);
+      blue(`Waiting ${delay/1000} seconds`);
       await page.waitFor(delay);
 
       const paddedIndex = String(index).padStart(2, '0');

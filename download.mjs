@@ -37,8 +37,8 @@ const download = ({ curriculum, directory }) => {
         .on('end', () => {
           fs.renameSync(tmpDest, dest);
 
-          const delay = waitBetweenSeconds(8, 12);
-          blue(`Waiting ${delay} seconds`);    
+          const delay = waitBetweenSeconds(12, 19);
+          blue(`Waiting ${delay/1000} seconds`);    
           timerToTryFoolDetectionThatMightNotWork = setTimeout(() => {
             download({
               curriculum: mutableCurriculumArray,
