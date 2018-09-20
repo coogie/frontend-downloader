@@ -3,6 +3,10 @@
 Simple Node script to automate the login and download of course videos from
 http://frontendmasters.com/ for Offline Viewing on Desktop/Laptop.
 
+*Only tested on Node v10.7*
+
+*Requires `--experimental-modules` flag.*
+
 ## Setup
 
 Run `yarn` or `npm install`.
