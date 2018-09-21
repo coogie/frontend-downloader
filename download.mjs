@@ -7,7 +7,6 @@ import { blue, green, waitBetweenSeconds } from './utils';
 
 let iteration = 0;
 let mutableCurriculumArray = [];
-let timerToTryFoolDetectionThatMightNotWork;
 
 const download = ({ curriculum, directory }) => {
   if (curriculum.length === 0) {
@@ -37,14 +36,10 @@ const download = ({ curriculum, directory }) => {
         .on('end', () => {
           fs.renameSync(tmpDest, dest);
 
-          const delay = waitBetweenSeconds(12, 19);
-          blue(`Waiting ${delay/1000} seconds`);    
-          timerToTryFoolDetectionThatMightNotWork = setTimeout(() => {
-            download({
-              curriculum: mutableCurriculumArray,
-              directory,
-            });
-          }, delay)
+          download({
+            curriculum: mutableCurriculumArray,
+            directory,
+          });
         });
     })
   })
