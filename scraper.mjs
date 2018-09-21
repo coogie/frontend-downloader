@@ -72,7 +72,7 @@ const scraper = async ({ username, password, targetCourse }) => {
       await link.click();
       // WOAH THE PONY!
       // Try make it look less suspect...
-      const delay = waitBetweenSeconds(8, 14);
+      const delay = waitBetweenSeconds(12, 19);
       blue(`Waiting ${delay/1000} seconds`);
       await page.waitFor(delay);
 
