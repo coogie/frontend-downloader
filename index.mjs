@@ -1,9 +1,11 @@
 import 'dotenv/config';
 import mkdirp from 'mkdirp';
 import path from 'path';
+import sanitizeFilename from 'sanitize-filename';
 
 import scraper from './scraper';
 import download from './download';
+import createReadmeFile from './createReadmeFile';
 import { red, blue } from './utils';
 
 (async () => {
@@ -33,13 +35,28 @@ import { red, blue } from './utils';
     directory: FRONTEND_MASTERS_DIR || `${path.join(process.cwd(), 'downloads')}`,
   };
 
-  const downloadDirectory = path.join(config.directory, config.targetCourse);
-  mkdirp.sync(downloadDirectory);
+  const {
+    title,
+    author,
+    description,
+    published,
+    modules,
+  } = await scraper(config);
 
-  const curriculum = await scraper(config);
- 
+  const downloadDirectory = path.join(
+    config.directory,
+    sanitizeFilename(title).replace(/\s/gi, '_')
+  );
+  mkdirp.sync(downloadDirectory);
+  createReadmeFile({
+    destination: downloadDirectory,
+    title,
+    author,
+    description,
+    published,
+  });
   download({
-    curriculum,
+    modules,
     directory: downloadDirectory,
   });
 })();

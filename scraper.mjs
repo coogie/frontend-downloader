@@ -9,7 +9,13 @@ const scraper = async ({ username, password, targetCourse }) => {
   try {
     // This will list our videos, with their titles and video src URL.
     // This array will be returned at the end of our function.
-    const CURRICULUM = [];
+    const CURRICULUM = {
+      title: '',
+      author: '',
+      description: '',
+      published: '',
+      modules: [],
+    };
 
     // Launch Chrome
     const browser = await puppeteer.launch();
@@ -33,6 +39,12 @@ const scraper = async ({ username, password, targetCourse }) => {
     blue(`Navigating to course: ${targetCourse}`);
     await page.goto(URL(['courses', targetCourse]));
     green('Successfully navigated to course');
+
+    // Gather the course metadata
+    CURRICULUM.title = await page.$eval('.title', e => e.innerText);
+    CURRICULUM.author = await page.$eval('.name', e => e.innerText);
+    CURRICULUM.description = await page.$eval('div.summary:nth-child(1) > p:nth-child(1)', e => e.innerText);
+    CURRICULUM.published = await page.$eval('.published', e => e.innerText);
 
     // Navigate to the Player Page for that course
     blue('Navigating to course player page');
@@ -71,7 +83,7 @@ const scraper = async ({ username, password, targetCourse }) => {
       };
       item.src = await page.evaluate(video => video.src, video);
       blue(`Adding "${item.title}" to curriculum`);
-      CURRICULUM.push(item);
+      CURRICULUM.modules.push(item);
       index = index + 1;
     }
 

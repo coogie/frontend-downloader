@@ -3,23 +3,23 @@ import https from 'https';
 import mkdirp from 'mkdirp';
 import path from 'path';
 
-import { blue, green, waitBetweenSeconds } from './utils';
+import { blue, green } from './utils';
 
 let iteration = 0;
-let mutableCurriculumArray = [];
+let mutableModulesArray = [];
 
-const download = ({ curriculum, directory }) => {
-  if (curriculum.length === 0) {
+const download = ({ modules, directory }) => {
+  if (modules.length === 0) {
     green('Nothing left to download');
     process.exit(0);
   }
 
   if (iteration === 0) {
-    mutableCurriculumArray = curriculum;
+    mutableModulesArray = modules;
     mkdirp.sync(directory);
   }
 
-  const { title, src } = mutableCurriculumArray.shift();
+  const { title, src } = mutableModulesArray.shift();
   const dest = `${path.join(directory, title)}.mp4`;
   const tmpDest = `${dest}.tmp`;
   const file = fs.createWriteStream(tmpDest);
@@ -37,7 +37,7 @@ const download = ({ curriculum, directory }) => {
           fs.renameSync(tmpDest, dest);
 
           download({
-            curriculum: mutableCurriculumArray,
+            modules: mutableModulesArray,
             directory,
           });
         });
